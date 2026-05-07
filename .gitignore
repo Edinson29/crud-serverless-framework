@@ -150,7 +150,7 @@ activemq-data/
 # Environments
 .env
 .envrc
-.venv
+.venv/
 env/
 venv/
 ENV/
@@ -220,3 +220,12 @@ __marimo__/
 
 # Serverless directories
 .serverless
+
+# Local DynamoDB data directory
+.dynamodb/
+
+# NODE modules
+node_modules/
+
+# DS_Store
+.DS_Store
