@@ -93,10 +93,25 @@ To learn more about the capabilities of `serverless-offline`, please refer to it
 
 ### Bundling dependencies
 
-In case you would like to include 3rd party dependencies, you will need to use a plugin called `serverless-python-requirements`. You can set it up by running the following command:
+Python dependencies are shipped as a **Lambda Layer** (`layer/python/`), which is shared across all four functions. The `layer/python/` directory is git-ignored and must be populated locally before deploying.
 
-```
-serverless plugin install -n serverless-python-requirements
+Install the dependencies targeting the `manylinux` platform used by AWS Lambda:
+
+```bash
+pip install \
+  --target layer/python \
+  --platform manylinux2014_x86_64 \
+  --implementation cp \
+  --python-version 3.12 \
+  --only-binary=:all: \
+  --upgrade \
+  -r requirements-layer.txt
 ```
 
-Running the above will automatically add `serverless-python-requirements` to `plugins` section in your `serverless.yml` file and add it as a `devDependency` to `package.json` file. The `package.json` file will be automatically created if it doesn't exist beforehand. Now you will be able to add your dependencies to `requirements.txt` file (`Pipfile` and `pyproject.toml` is also supported but requires additional configuration) and they will be automatically injected to Lambda package during build process. For more details about the plugin's configuration, please refer to [official documentation](https://github.com/UnitedIncome/serverless-python-requirements).
+> `boto3` and `botocore` are listed in `requirements.txt` for local development but are kept out of `requirements-layer.txt` because AWS Lambda already includes them in the Python 3.12 runtime.
+
+After running the command above, deploy normally:
+
+```bash
+serverless deploy
+```

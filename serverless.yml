@@ -14,7 +14,15 @@ provider:
         - Effect: Allow
           Action: 'dynamodb:*'
           Resource: 'arn:aws:dynamodb:us-east-1:488772165638:table/usersTable'
+  layers:
+    - !Ref PythonDepsLambdaLayer
 
+layers:
+  pythonDeps:
+    path: layer
+    compatibleRuntimes:
+      - python3.12
+    description: "Shared Python dependencies (fastapi, mangum, pydantic, python-dotenv)"
 
 functions:
   get-users:
@@ -42,6 +50,7 @@ functions:
     package:
       patterns:
         - update_users/**
+        - shared_package/**
     events:
       - httpApi:
           path: /users/{id}
@@ -52,6 +61,7 @@ functions:
     package:
       patterns:
         - delete_users/**
+        - shared_package/**
     events:
       - httpApi:
           path: /users/{id}
@@ -77,6 +87,7 @@ package:
     - '!.python-version'
     - '!bin/**'
     - '!*.egg-info/**'
+    - '!layer/**'
 
 custom:
   serverless-dynamodb:
@@ -86,18 +97,6 @@ custom:
       port: 8000
       inMemory: true
       migrate: true
-  pythonRequirements:
-    dockerizePip: false
-    slim: true
-    strip: true
-    usePipenv: false
-    pipCmdExtraArgs:
-      - "--platform manylinux2014_x86_64"
-      - "--upgrade"
-    noDeploy:
-      - boto3
-      - botocore
-      - s3transfer
 
 resources:
   Resources:

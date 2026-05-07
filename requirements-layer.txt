@@ -1,0 +1,7 @@
+# Dependencies bundled into the Lambda Layer.
+# boto3, botocore and s3transfer are intentionally excluded because
+# AWS Lambda already provides them in the Python 3.12 runtime.
+fastapi==0.136.1
+mangum==0.21.0
+python-dotenv==1.2.2
+pydantic[email]==2.13.3
