@@ -24,7 +24,16 @@ This template does not include any kind of persistence (database). For more adva
 
 ### Deployment
 
+> **Important:** The Lambda Layer (`layer/python/`) is git-ignored and must be populated with Python packages before deploying. Use the `make deploy` command below — it handles both steps automatically.
+
+```bash
+make deploy
 ```
+
+Or run the steps manually:
+
+```bash
+make install-layer   # build layer/python/ from requirements-layer.txt
 serverless deploy
 ```
 
