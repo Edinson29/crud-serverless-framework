@@ -32,6 +32,18 @@ functions:
           path: /users
           method: GET
 
+  create-users:
+    handler: create_users/handler.handler
+    package:
+      patterns:
+        - create_users/**
+    layers:
+      - { Ref: PythonRequirementsLambdaLayer }
+    events:
+      - httpApi:
+          path: /users
+          method: POST
+
 
 plugins:
   - serverless-offline
