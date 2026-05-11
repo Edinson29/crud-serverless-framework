@@ -5,36 +5,24 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from mangum import Mangum
 
-from shared_package.schema import UserBody
+from delete_users.repository.delete import validate_delete_user
 
 
-load_dotenv()
 app = FastAPI()
 
-dynamodb_client_params = {}
-
-if os.getenv("IS_OFFLINE"):
-    dynamodb_client_params = {
-        "region_name": "localhost",
-        "endpoint_url": "http://localhost:8000",
-        "aws_access_key_id": "MockAccessKeyId",
-        "aws_secret_access_key": ""
-    }
-
-dynamodb = boto3.resource("dynamodb", **dynamodb_client_params)
-table = dynamodb.Table("usersTable")
 
 @app.delete("/users/{id}")
 async def delete_users(id: str):
     try:
-        response: dict = table.delete_item(
-            Key={'pk': id}
-        )
+        validate_delete_user(id)
 
         return JSONResponse(
             status_code=200,
             content={ "body": f"The user with pk: {id} has been deleted!" }
         )
+    except HTTPException as http_exc:
+        print(http_exc.detail)
+        raise http_exc
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
