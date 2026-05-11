@@ -1,0 +1,83 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: deved29
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: crud-awslambda
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: crud-serverless-framework
+
+provider:
+  name: aws
+  runtime: python3.12
+  stage: ${opt:stage, 'dev'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: 'dynamodb:*'
+          Resource: 'arn:aws:dynamodb:us-east-1:488772165638:table/usersTable'
+  environment:
+    DYNAMODB_TABLE_NAME: '${ssm:/crud-serverless-framework/${sls:stage}/DYNAMODB_TABLE_NAME}'
+
+
+functions:
+  get-users:
+    handler: get_users/handler.handler
+    package:
+      patterns:
+        - get_users/**
+    layers:
+      - { Ref: PythonRequirementsLambdaLayer }
+    events:
+      - httpApi:
+          path: /users
+          method: GET
+
+
+plugins:
+  - serverless-offline
+  - serverless-dynamodb
+
+
+package:
+  individually: true
+  patterns:
+    - "!**"
+    - "shared_package/**"
+
+custom:
+  serverless-dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+  pythonRequirements:
+    dockerizePip: false
+    slim: true
+    strip: true
+    usePipenv: false
+    layer: true
+    pipCmdExtraArgs:
+      - "--platform manylinux2014_x86_64"
+      - "--upgrade"
+    noDeploy:
+      - boto3
+      - botocore
+      - s3transfer
+
+resources:
+  Resources:
+    usersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: usersTable
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
