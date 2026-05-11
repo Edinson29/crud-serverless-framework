@@ -44,6 +44,17 @@ functions:
           path: /users
           method: POST
 
+  update-users:
+    handler: update_users/handler.handler
+    package:
+      patterns:
+        - update_users/**
+    layers:
+      - { Ref: PythonRequirementsLambdaLayer }
+    events:
+      - httpApi:
+          path: /users/{id}
+          method: PUT
 
 plugins:
   - serverless-offline
