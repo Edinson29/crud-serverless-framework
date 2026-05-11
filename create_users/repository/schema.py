@@ -1,6 +1,6 @@
 """This file contains the schema for the create_users function."""
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 
@@ -9,4 +9,4 @@ class UserBody(BaseModel):
     first_name: str
     last_name: str
     phone_number: str
-    email: EmailStr
+    email: str
