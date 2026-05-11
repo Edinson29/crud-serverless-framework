@@ -8,12 +8,15 @@ service: crud-serverless-framework
 provider:
   name: aws
   runtime: python3.12
+  stage: ${opt:stage, 'dev'}
   iam:
     role:
       statements:
         - Effect: Allow
           Action: 'dynamodb:*'
           Resource: 'arn:aws:dynamodb:us-east-1:488772165638:table/usersTable'
+  environment:
+    DYNAMODB_TABLE_NAME: '${ssm:/crud-serverless-framework/${sls:stage}/DYNAMODB_TABLE_NAME}'
 
 
 functions:
@@ -22,6 +25,8 @@ functions:
     package:
       patterns:
         - get_users/**
+    layers:
+      - { Ref: PythonRequirementsLambdaLayer }
     events:
       - httpApi:
           path: /users
@@ -32,6 +37,8 @@ functions:
     package:
       patterns:
         - create_users/**
+    layers:
+      - { Ref: PythonRequirementsLambdaLayer }
     events:
       - httpApi:
           path: /users
@@ -42,6 +49,8 @@ functions:
     package:
       patterns:
         - update_users/**
+    layers:
+      - { Ref: PythonRequirementsLambdaLayer }
     events:
       - httpApi:
           path: /users/{id}
@@ -52,6 +61,8 @@ functions:
     package:
       patterns:
         - delete_users/**
+    layers:
+      - { Ref: PythonRequirementsLambdaLayer }
     events:
       - httpApi:
           path: /users/{id}
@@ -65,18 +76,8 @@ plugins:
 package:
   individually: true
   patterns:
-    - '!node_modules/**'
-    - '!.venv/**'
-    - '!env/**'
-    - '!__pycache__/**'
-    - '!.git/**'
-    - '!.env'
-    - '!package.json'
-    - '!package-lock.json'
-    - '!README.md'
-    - '!.python-version'
-    - '!bin/**'
-    - '!*.egg-info/**'
+    - "!**"
+    - "shared_package/**"
 
 custom:
   serverless-dynamodb:
@@ -91,6 +92,7 @@ custom:
     slim: true
     strip: true
     usePipenv: false
+    layer: true
     pipCmdExtraArgs:
       - "--platform manylinux2014_x86_64"
       - "--upgrade"
