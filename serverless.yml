@@ -56,6 +56,18 @@ functions:
           path: /users/{id}
           method: PUT
 
+  delete-users:
+    handler: delete_users/handler.handler
+    package:
+      patterns:
+        - delete_users/**
+    layers:
+      - { Ref: PythonRequirementsLambdaLayer }
+    events:
+      - httpApi:
+          path: /users/{id}
+          method: DELETE
+
 plugins:
   - serverless-offline
   - serverless-dynamodb
